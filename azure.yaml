@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+name: voice-live-pricing
+metadata:
+  template: voice-live-pricing
+services:
+  web:
+    project: .
+    host: containerapp
+    language: py
+    docker:
+      path: Dockerfile

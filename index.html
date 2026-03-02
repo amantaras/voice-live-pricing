@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+    <title>Azure Voice Live Pricing Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo">
+                <i class="fas fa-microphone-lines"></i>
+                <div>
+                    <h1>Azure Voice Live</h1>
+                    <span class="subtitle">Pricing Calculator</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="user-info" id="userInfo" style="display:none;">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="userName"></span>
+                    <button class="btn btn-sm" id="logoutBtn" title="Sign out"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+                <button class="btn btn-refresh" id="loginBtn" style="display:none;">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Sign In</span>
+                </button>
+                <button id="refreshPrices" class="btn btn-refresh" title="Fetch latest prices from Azure Retail Prices API">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Refresh Prices</span>
+                </button>
+                <div class="price-status" id="priceStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Using default prices</span>
+                    <span class="status-date" id="priceDate"></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Configuration Panel -->
+        <section class="config-panel">
+            <div class="config-grid">
+                <!-- Region Selector -->
+                <div class="config-card">
+                    <label class="config-label has-tooltip"><i class="fas fa-globe"></i> Azure Region<span class="tooltip-icon">?</span><span class="tooltip-text">Azure datacenter region where your Voice Live service runs. Prices may vary by region. Choose the region closest to your users for lowest latency.</span></label>
+                    <select id="regionSelect" class="config-select">
+                        <option value="eastus">East US</option>
+                        <option value="eastus2">East US 2</option>
+                        <option value="westus">West US</option>
+                        <option value="westus2">West US 2</option>
+                        <option value="westus3">West US 3</option>
+                        <option value="centralus">Central US</option>
+                        <option value="northcentralus">North Central US</option>
+                        <option value="southcentralus">South Central US</option>
+                        <option value="westeurope">West Europe</option>
+                        <option value="northeurope">North Europe</option>
+                        <option value="uksouth">UK South</option>
+                        <option value="ukwest">UK West</option>
+                        <option value="francecentral">France Central</option>
+                        <option value="germanywestcentral">Germany West Central</option>
+                        <option value="switzerlandnorth">Switzerland North</option>
+                        <option value="norwayeast">Norway East</option>
+                        <option value="swedencentral">Sweden Central</option>
+                        <option value="southeastasia">Southeast Asia</option>
+                        <option value="eastasia">East Asia</option>
+                        <option value="japaneast">Japan East</option>
+                        <option value="japanwest">Japan West</option>
+                        <option value="koreacentral">Korea Central</option>
+                        <option value="australiaeast">Australia East</option>
+                        <option value="canadacentral">Canada Central</option>
+                        <option value="brazilsouth">Brazil South</option>
+                        <option value="centralindia">Central India</option>
+                        <option value="uaenorth">UAE North</option>
+                        <option value="southafricanorth">South Africa North</option>
+                        <option value="qatarcentral">Qatar Central</option>
+                    </select>
+                </div>
+
+                <!-- Currency Selector -->
+                <div class="config-card">
+                    <label class="config-label has-tooltip"><i class="fas fa-money-bill-wave"></i> Currency<span class="tooltip-icon">?</span><span class="tooltip-text">Display currency for pricing. All Azure prices are based in USD and converted using Microsoft's exchange rates.</span></label>
+                    <select id="currencySelect" class="config-select">
+                        <option value="USD">USD – US Dollar</option>
+                        <option value="EUR">EUR – Euro</option>
+                        <option value="GBP">GBP – British Pound</option>
+                        <option value="AUD">AUD – Australian Dollar</option>
+                        <option value="CAD">CAD – Canadian Dollar</option>
+                        <option value="JPY">JPY – Japanese Yen</option>
+                        <option value="KRW">KRW – Korean Won</option>
+                        <option value="INR">INR – Indian Rupee</option>
+                        <option value="BRL">BRL – Brazilian Real</option>
+                        <option value="CHF">CHF – Swiss Franc</option>
+                        <option value="SEK">SEK – Swedish Krona</option>
+                        <option value="NOK">NOK – Norwegian Krone</option>
+                        <option value="DKK">DKK – Danish Krone</option>
+                        <option value="SGD">SGD – Singapore Dollar</option>
+                        <option value="AED">AED – UAE Dirham</option>
+                        <option value="ZAR">ZAR – S. African Rand</option>
+                        <option value="QAR">QAR – Qatari Riyal</option>
+                    </select>
+                </div>
+
+                <!-- Customer Info -->
+                <div class="config-card">
+                    <label class="config-label has-tooltip"><i class="fas fa-building"></i> Customer / Project<span class="tooltip-icon">?</span><span class="tooltip-text">Name of the customer or project. Appears on exported PDF/Excel quotes for identification.</span></label>
+                    <input type="text" id="customerName" class="config-input" placeholder="Enter customer or project name">
+                </div>
+
+                <!-- Quote Reference -->
+                <div class="config-card">
+                    <label class="config-label has-tooltip"><i class="fas fa-hashtag"></i> Quote Reference<span class="tooltip-icon">?</span><span class="tooltip-text">Auto-generated unique reference ID for this quote. Included in all exports for tracking.</span></label>
+                    <input type="text" id="quoteRef" class="config-input" placeholder="Auto-generated" readonly>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Voice Live Tier Selection -->
+        <section class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-layer-group"></i> Voice Live API Tier & Model Selection</h2>
+                <p class="section-desc">Select a Voice Live tier and model. Pricing varies by tier based on the underlying LLM capabilities.</p>
+            </div>
+            <div class="tier-grid">
+                <div class="tier-card selected" data-tier="pro">
+                    <div class="tier-badge tier-pro">PRO</div>
+                    <h3 class="has-tooltip">Voice Live Pro<span class="tooltip-icon">?</span><span class="tooltip-text">Premium tier using larger LLMs (GPT-Realtime, GPT-4o, GPT-4.1) for complex, high-quality conversational scenarios. Highest per-token cost but best output quality.</span></h3>
+                    <p class="tier-desc">Larger LLMs for complex scenarios</p>
+                    <div class="tier-models">
+                        <select class="model-select" data-tier="pro">
+                            <option value="gpt-realtime">GPT-Realtime</option>
+                            <option value="gpt-4o">GPT-4o</option>
+                            <option value="gpt-4.1">GPT-4.1</option>
+                        </select>
+                    </div>
+                    <div class="tier-llm-mode">
+                        <label><i class="fas fa-brain"></i> LLM Mode</label>
+                        <select class="llm-mode-select" data-tier="pro">
+                            <option value="audio">Native Audio</option>
+                            <option value="both">Both Audio + Text</option>
+                        </select>
+                    </div>
+                    <div class="tier-price-preview">
+                        <span>Audio Input</span>
+                        <strong id="proInputPreview">$0.020/1K tokens</strong>
+                    </div>
+                </div>
+                <div class="tier-card" data-tier="standard">
+                    <div class="tier-badge tier-standard">STANDARD</div>
+                    <h3 class="has-tooltip">Voice Live Standard<span class="tooltip-icon">?</span><span class="tooltip-text">Mid-tier using smaller LLMs (GPT-4o Mini, GPT-4.1 Mini) for cost-effective conversations. Good balance of quality and price.</span></h3>
+                    <p class="tier-desc">Smaller LLMs, cost-effective</p>
+                    <div class="tier-models">
+                        <select class="model-select" data-tier="standard">
+                            <option value="gpt-4o-mini-realtime">GPT-4o Mini Realtime</option>
+                            <option value="gpt-4o-mini">GPT-4o Mini</option>
+                            <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+                        </select>
+                    </div>
+                    <div class="tier-llm-mode">
+                        <label><i class="fas fa-brain"></i> LLM Mode</label>
+                        <select class="llm-mode-select" data-tier="standard">
+                            <option value="audio">Native Audio</option>
+                            <option value="both">Both Audio + Text</option>
+                        </select>
+                    </div>
+                    <div class="tier-price-preview">
+                        <span>Audio Input</span>
+                        <strong id="stdInputPreview">$0.010/1K tokens</strong>
+                    </div>
+                </div>
+                <div class="tier-card" data-tier="lite">
+                    <div class="tier-badge tier-lite">LITE</div>
+                    <h3 class="has-tooltip">Voice Live Lite<span class="tooltip-icon">?</span><span class="tooltip-text">Lightweight tier using SLMs (GPT-4.1 Nano, Phi) for simple, high-volume tasks. Lowest cost. Note: LLM Audio Output is not available in this tier.</span></h3>
+                    <p class="tier-desc">SLMs for lightweight tasks</p>
+                    <div class="tier-models">
+                        <select class="model-select" data-tier="lite">
+                            <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+                            <option value="phi">Phi Models</option>
+                        </select>
+                    </div>
+                    <div class="tier-llm-mode">
+                        <label><i class="fas fa-brain"></i> LLM Mode</label>
+                        <select class="llm-mode-select" data-tier="lite">
+                            <option value="text">Text (STT→LLM→TTS)</option>
+                        </select>
+                    </div>
+                    <div class="tier-price-preview">
+                        <span>Audio Input</span>
+                        <strong id="liteInputPreview">$0.010/1K tokens</strong>
+                    </div>
+                </div>
+                <div class="tier-card" data-tier="byo">
+                    <div class="tier-badge tier-byo">BYO</div>
+                    <h3 class="has-tooltip">Voice Live BYO<span class="tooltip-icon">?</span><span class="tooltip-text">Bring Your Own Model. Only audio processing (STT/TTS) is charged — you pay for your own LLM separately. Only Standard/Custom Audio Input &amp; Output meters apply.</span></h3>
+                    <p class="tier-desc">Bring Your Own Model</p>
+                    <div class="tier-models">
+                        <select class="model-select" data-tier="byo">
+                            <option value="custom">Your Custom Model</option>
+                        </select>
+                    </div>
+                    <div class="tier-llm-mode">
+                        <label><i class="fas fa-brain"></i> LLM Mode</label>
+                        <select class="llm-mode-select" data-tier="byo" disabled>
+                            <option value="text">N/A (BYO)</option>
+                        </select>
+                    </div>
+                    <div class="tier-price-preview">
+                        <span>Audio Input</span>
+                        <strong id="byoInputPreview">$0.010/1K tokens</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Sections -->
+        <div class="pricing-layout">
+            <!-- Left Column: Input Parameters -->
+            <div class="pricing-inputs">
+
+                <!-- Voice Live Call Estimator -->
+                <section class="pricing-section" id="voiceLiveSection">
+                    <div class="section-header-compact">
+                        <h3><i class="fas fa-phone-volume"></i> Voice Live API Usage</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleVoiceLive" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div id="voiceLiveInputs">
+                        <!-- Call Estimator -->
+                        <div class="call-estimator">
+                            <div class="estimator-header">
+                                <h4><i class="fas fa-sliders"></i> Call Estimator</h4>
+                                <p class="estimator-desc">Enter your expected call volume and duration. Token counts are calculated automatically.</p>
+                            </div>
+                            <div class="estimator-grid">
+                                <div class="input-group estimator-input span-full">
+                                    <label class="has-tooltip"><i class="fas fa-hourglass-half"></i> Total hours per month<span class="tooltip-icon">?</span><span class="tooltip-text">Total voice conversation hours expected per month. Enter this and the calculator auto-computes calls based on your average duration, or fill calls and duration manually below.</span></label>
+                                    <input type="number" id="vlHoursPerMonth" class="estimator-field" value="0" min="0" step="0.5" placeholder="e.g. 100">
+                                    <span class="input-hint">Enter total voice hours — calls &amp; duration are calculated automatically, or fill them manually below</span>
+                                </div>
+                                <div class="input-group estimator-input">
+                                    <label class="has-tooltip"><i class="fas fa-phone"></i> Calls per month<span class="tooltip-icon">?</span><span class="tooltip-text">Number of individual voice agent calls expected per month. Together with duration, this determines total hours and token consumption.</span></label>
+                                    <input type="number" id="vlCallsPerMonth" class="estimator-field" value="0" min="0" step="1" placeholder="e.g. 1000">
+                                </div>
+                                <div class="input-group estimator-input">
+                                    <label class="has-tooltip"><i class="fas fa-clock"></i> Avg. call duration <span class="unit">(minutes)</span><span class="tooltip-icon">?</span><span class="tooltip-text">Average length of each call in minutes. Typical customer service calls: 3–10 min. Longer calls produce more audio tokens per call.</span></label>
+                                    <input type="number" id="vlCallDuration" class="estimator-field" value="5" min="0.5" step="0.5" placeholder="e.g. 5">
+                                </div>
+                                <div class="input-group estimator-input">
+                                    <label class="has-tooltip"><i class="fas fa-arrows-turn-right"></i> Avg. turns per call <span class="unit">(back &amp; forth)</span><span class="tooltip-icon">?</span><span class="tooltip-text">Number of back-and-forth exchanges per call. 1 turn = user speaks → agent responds. More turns significantly increase LLM input tokens due to context accumulation (scales as N×(N+1)/2).</span></label>
+                                    <input type="number" id="vlTurnsPerCall" class="estimator-field" value="6" min="1" step="1" placeholder="e.g. 6">
+                                    <span class="input-hint">1 turn = user speaks → system responds</span>
+                                </div>
+                                <div class="input-group estimator-input">
+                                    <label class="has-tooltip"><i class="fas fa-microphone"></i> Speech model type<span class="tooltip-icon">?</span><span class="tooltip-text">Standard: uses Azure prebuilt voices (lower cost). Custom: uses your trained custom speech models (charged at custom audio rates for both STT and TTS).</span></label>
+                                    <select id="vlSpeechModel" class="config-select estimator-field">
+                                        <option value="standard">Standard Speech</option>
+                                        <option value="custom">Custom Speech</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group estimator-input">
+                                    <label class="has-tooltip"><i class="fas fa-database"></i> System prompt caching<span class="tooltip-icon">?</span><span class="tooltip-text">Caching reuses system prompt tokens across calls, reducing costs. None: no caching. Light: ~20% cached (small prompts). Heavy: ~50% cached (large context windows or RAG scenarios). Cached tokens are priced lower.</span></label>
+                                    <select id="vlCaching" class="config-select estimator-field">
+                                        <option value="none">No caching</option>
+                                        <option value="light">Light (small system prompt)</option>
+                                        <option value="heavy">Heavy (large context/RAG)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Token Rate Configuration (auto-set from model, read-only) -->
+                            <div class="token-rates-panel">
+                                <div class="token-rates-header">
+                                    <h5><i class="fas fa-gauge-high"></i> Audio Token Rates <span class="badge-source">Auto from model</span></h5>
+                                </div>
+                                <p class="token-rates-desc">Token rates per second of audio, set automatically based on the selected model. Source: <a href="https://learn.microsoft.com/azure/ai-services/speech-service/voice-live#token-usage-and-cost-estimation" target="_blank" rel="noopener">Microsoft docs</a>.</p>
+                                <div class="token-rates-grid">
+                                    <div class="input-group token-rate-input">
+                                        <label class="has-tooltip">Input <span class="unit">(tok/sec)</span><span class="tooltip-icon">?</span><span class="tooltip-text">Audio input tokens generated per second of speech. ~10 for OpenAI models, ~12.5 for Phi models.</span></label>
+                                        <input type="number" id="vlTokenRateInput" class="estimator-field" value="10" disabled>
+                                        <span class="input-hint">~10 (OpenAI) · ~12.5 (Phi)</span>
+                                    </div>
+                                    <div class="input-group token-rate-input">
+                                        <label class="has-tooltip">Output <span class="unit">(tok/sec)</span><span class="tooltip-icon">?</span><span class="tooltip-text">Audio output tokens generated per second of synthesized speech. ~20 for all models.</span></label>
+                                        <input type="number" id="vlTokenRateOutput" class="estimator-field" value="20" disabled>
+                                        <span class="input-hint">~20 (all models)</span>
+                                    </div>
+                                    <div class="input-group token-rate-input">
+                                        <label class="has-tooltip">Text <span class="unit">(tok/turn)</span><span class="tooltip-icon">?</span><span class="tooltip-text">Average LLM text tokens per conversational turn (~150). Auto-set per model.</span></label>
+                                        <input type="number" id="vlTextTokensPerTurn" class="estimator-field" value="150" disabled>
+                                        <span class="input-hint">Avg text tokens per LLM turn</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Token Estimation Preview -->
+                            <div class="token-preview" id="tokenPreview">
+                                <div class="token-preview-header">
+                                    <h4><i class="fas fa-calculator"></i> Estimated Monthly Tokens</h4>
+                                    <button class="btn-link expanded" id="toggleTokenDetails" type="button">
+                                        <span>Hide details</span> <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div class="token-summary-row">
+                                    <div class="token-stat">
+                                        <span class="token-stat-value" id="estTotalMinutes">0</span>
+                                        <span class="token-stat-label has-tooltip">Total audio min/mo<span class="tooltip-icon">?</span><span class="tooltip-text">Total minutes of audio processed per month (calls × avg. duration).</span></span>
+                                    </div>
+                                    <div class="token-stat">
+                                        <span class="token-stat-value" id="estTotalTokens">0</span>
+                                        <span class="token-stat-label has-tooltip">Total tokens (K)/mo<span class="tooltip-icon">?</span><span class="tooltip-text">Sum of all token categories (audio input, audio output, LLM text, LLM audio, cached) in thousands per month.</span></span>
+                                    </div>
+                                    <div class="token-stat highlight">
+                                        <span class="token-stat-value" id="estCostPerCall">$0.00</span>
+                                        <span class="token-stat-label has-tooltip">Est. cost per call<span class="tooltip-icon">?</span><span class="tooltip-text">Estimated average cost per call based on your configuration. Total monthly cost ÷ number of calls.</span></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Token Breakdown (collapsible) -->
+                            <div class="token-details" id="tokenDetails">
+                                <table class="token-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Token Category</th>
+                                            <th>Tokens / Call</th>
+                                            <th>Monthly (K tokens)</th>
+                                            <th>Price / 1K tokens</th>
+                                            <th>Monthly Cost</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tokenTableBody">
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3"></td>
+                                            <td><strong>Total</strong></td>
+                                            <td><strong id="tokenTableTotal">$0.00</strong></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <p class="token-note">
+                                    <i class="fas fa-info-circle"></i>
+                                    Token rates are configurable above. Defaults from <a href="https://learn.microsoft.com/azure/ai-services/speech-service/voice-live#token-usage-and-cost-estimation" target="_blank" rel="noopener">Microsoft docs</a>.
+                                    <strong>LLM Input</strong> grows with turns — each turn re-processes accumulated context (scales as N×(N+1)/2).
+                                    <strong>LLM Output</strong> is proportional to total response time.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Hidden token fields (populated by estimator, used by calculation engine) -->
+                        <div style="display:none">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="standardAudioInput" id="vlTokenStdAudioIn" value="0">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="standardAudioOutput" id="vlTokenStdAudioOut" value="0">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="standardAudioCached" id="vlTokenStdAudioCached" value="0">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="customAudioInput" id="vlTokenCstAudioIn" value="0">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="customAudioOutput" id="vlTokenCstAudioOut" value="0">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="customAudioCached" id="vlTokenCstAudioCached" value="0">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="llmTextInput" id="vlTokenLlmTextIn" value="0">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="llmTextOutput" id="vlTokenLlmTextOut" value="0">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="llmTextCached" id="vlTokenLlmTextCached" value="0">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="llmAudioInput" id="vlTokenLlmAudioIn" value="0">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="llmAudioOutput" id="vlTokenLlmAudioOut" value="0">
+                            <input type="number" class="calc-input" data-category="voiceLive" data-meter="llmAudioCached" id="vlTokenLlmAudioCached" value="0">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Speech to Text -->
+                <section class="pricing-section" id="sttSection" style="display:none">
+                    <div class="section-header-compact">
+                        <h3><i class="fas fa-ear-listen"></i> Speech to Text</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleSTT">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="pricing-grid collapsed" id="sttInputs">
+                        <div class="input-group">
+                            <label>Real-time Transcription – Standard <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="stt" data-meter="realtimeStandard" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Real-time Transcription – Custom <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="stt" data-meter="realtimeCustom" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Batch Transcription – Standard <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="stt" data-meter="batchStandard" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Batch Transcription – Custom <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="stt" data-meter="batchCustom" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Fast Transcription – Standard <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="stt" data-meter="fastStandard" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Fast Transcription – Custom <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="stt" data-meter="fastCustom" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Enhanced: Language ID <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="stt" data-meter="enhancedLangId" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Enhanced: Diarization <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="stt" data-meter="enhancedDiarization" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Enhanced: Pronunciation Assessment <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="stt" data-meter="enhancedPronunciation" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Custom Speech Training <span class="unit">(compute hours)</span></label>
+                            <input type="number" class="calc-input" data-category="stt" data-meter="customTraining" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Custom Model Hosting <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="stt" data-meter="customHosting" value="0" min="0" step="0.1">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Text to Speech -->
+                <section class="pricing-section" id="ttsSection" style="display:none">
+                    <div class="section-header-compact">
+                        <h3><i class="fas fa-volume-high"></i> Text to Speech</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleTTS">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="pricing-grid collapsed" id="ttsInputs">
+                        <div class="input-group">
+                            <label>Neural Voice <span class="unit">(M characters)</span></label>
+                            <input type="number" class="calc-input" data-category="tts" data-meter="neural" value="0" min="0" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>Neural HD Voice <span class="unit">(M characters)</span></label>
+                            <input type="number" class="calc-input" data-category="tts" data-meter="neuralHD" value="0" min="0" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>Custom Neural Voice – Professional <span class="unit">(M characters)</span></label>
+                            <input type="number" class="calc-input" data-category="tts" data-meter="customNeural" value="0" min="0" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>Custom Neural HD Voice <span class="unit">(M characters)</span></label>
+                            <input type="number" class="calc-input" data-category="tts" data-meter="customNeuralHD" value="0" min="0" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>Personal Voice <span class="unit">(M characters)</span></label>
+                            <input type="number" class="calc-input" data-category="tts" data-meter="personalVoice" value="0" min="0" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>Custom Voice Training <span class="unit">(compute hours)</span></label>
+                            <input type="number" class="calc-input" data-category="tts" data-meter="customVoiceTraining" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Custom Voice Model Hosting <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="tts" data-meter="customVoiceHosting" value="0" min="0" step="0.1">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Speech Translation -->
+                <section class="pricing-section" id="translationSection" style="display:none">
+                    <div class="section-header-compact">
+                        <h3><i class="fas fa-language"></i> Speech Translation</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleTranslation">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="pricing-grid collapsed" id="translationInputs">
+                        <div class="input-group">
+                            <label>Real-time Speech Translation <span class="unit">(audio hours)</span></label>
+                            <input type="number" class="calc-input" data-category="translation" data-meter="realtime" value="0" min="0" step="0.1">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Live Interpreter -->
+                <section class="pricing-section" id="interpreterSection" style="display:none">
+                    <div class="section-header-compact">
+                        <h3><i class="fas fa-headset"></i> Live Interpreter</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleInterpreter">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="pricing-grid collapsed" id="interpreterInputs">
+                        <div class="input-group">
+                            <label>Input Audio <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="interpreter" data-meter="inputAudio" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Output Text <span class="unit">(M characters)</span></label>
+                            <input type="number" class="calc-input" data-category="interpreter" data-meter="outputText" value="0" min="0" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>Output Audio – Standard Voice <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="interpreter" data-meter="outputAudioStd" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Output Audio – Custom Voice <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="interpreter" data-meter="outputAudioCustom" value="0" min="0" step="0.1">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Video Translation -->
+                <section class="pricing-section" id="videoSection" style="display:none">
+                    <div class="section-header-compact">
+                        <h3><i class="fas fa-video"></i> Video Translation</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleVideo">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="pricing-grid collapsed" id="videoInputs">
+                        <div class="input-group">
+                            <label>Input Video <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="video" data-meter="inputVideo" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Output – Standard Voice <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="video" data-meter="outputStd" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Output – Personal Voice <span class="unit">(hours)</span></label>
+                            <input type="number" class="calc-input" data-category="video" data-meter="outputPersonal" value="0" min="0" step="0.1">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Avatar -->
+                <section class="pricing-section" id="avatarSection" style="display:none">
+                    <div class="section-header-compact">
+                        <h3><i class="fas fa-user-astronaut"></i> Avatar (Text to Speech)</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleAvatar">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="pricing-grid collapsed" id="avatarInputs">
+                        <div class="input-group">
+                            <label>Interactive Avatar – Real-time <span class="unit">(minutes)</span></label>
+                            <input type="number" class="calc-input" data-category="avatar" data-meter="interactiveRealtime" value="0" min="0">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Speaker Recognition -->
+                <section class="pricing-section" id="speakerSection" style="display:none">
+                    <div class="section-header-compact">
+                        <h3><i class="fas fa-fingerprint"></i> Speaker Recognition</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleSpeaker">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="pricing-grid collapsed" id="speakerInputs">
+                        <div class="input-group">
+                            <label>Speaker Identification <span class="unit">(K transactions)</span></label>
+                            <input type="number" class="calc-input" data-category="speaker" data-meter="identification" value="0" min="0" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>Speaker Verification <span class="unit">(K transactions)</span></label>
+                            <input type="number" class="calc-input" data-category="speaker" data-meter="verification" value="0" min="0" step="0.1">
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Summary / BoQ -->
+            <aside class="pricing-summary">
+                <div class="summary-card sticky">
+                    <div class="summary-header">
+                        <h3><i class="fas fa-receipt"></i> Cost Summary</h3>
+                        <div class="summary-period">
+                            <select id="billingPeriod" class="period-select">
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="summary-body" id="summaryBody">
+                        <div class="summary-empty">
+                            <i class="fas fa-calculator"></i>
+                            <p>Enter usage quantities to see cost breakdown</p>
+                        </div>
+                    </div>
+
+                    <div class="summary-total">
+                        <div class="total-row">
+                            <span>Estimated Total</span>
+                            <span class="total-amount" id="totalAmount">$0.00</span>
+                        </div>
+                        <div class="total-row sub">
+                            <span>Currency</span>
+                            <span id="totalCurrency">USD</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-actions">
+                        <button class="btn btn-primary btn-full" id="exportPDF">
+                            <i class="fas fa-file-pdf"></i> Export PDF (BoQ)
+                        </button>
+                        <button class="btn btn-secondary btn-full" id="exportExcel">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                        <button class="btn btn-outline btn-full" id="saveReport">
+                            <i class="fas fa-save"></i> Save Report
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Fetching latest prices from Azure...</p>
+        </div>
+    </div>
+
+    <!-- Saved Reports Modal -->
+    <div class="modal-overlay" id="savedReportsModal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-folder-open"></i> Saved Reports</h3>
+                <button class="modal-close" id="closeReportsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="reportsList" class="reports-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Prices are estimates based on Azure Retail Prices API. Actual pricing may vary. See <a href="https://azure.microsoft.com/en-us/pricing/details/speech/" target="_blank" rel="noopener">Azure Speech Pricing</a> for official rates.</p>
+        <p class="footer-note">Last price refresh: <span id="lastRefresh">Not yet refreshed</span></p>
+    </footer>
+
+    <script src="app.js?v=2"></script>
+</body>
+</html>

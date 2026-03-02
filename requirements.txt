@@ -1,0 +1,10 @@
+"""
+requirements.txt for the Voice Live Pricing Calculator server.
+"""
+flask==3.1.0
+azure-storage-blob==12.24.1
+azure-identity==1.19.0
+PyJWT==2.10.1
+cryptography==44.0.0
+requests==2.32.3
+gunicorn==23.0.0
