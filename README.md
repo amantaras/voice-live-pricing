@@ -12,6 +12,7 @@ A comprehensive, interactive pricing calculator for the **Azure Voice Live API**
 ## 📋 Table of Contents
 
 - [Overview](#overview)
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Understanding Voice Live Tiers](#understanding-voice-live-tiers)
@@ -22,6 +23,18 @@ A comprehensive, interactive pricing calculator for the **Azure Voice Live API**
 - [Project Structure](#project-structure)
 - [Configuration Reference](#configuration-reference)
 - [References](#references)
+
+---
+
+## Screenshots
+
+| Dashboard Overview | Tier Selection |
+|---|---|
+| ![Dashboard](docs/images/01-dashboard-overview.png) | ![Tiers](docs/images/03-tier-selection.png) |
+
+| Call Estimator | Cost Summary |
+|---|---|
+| ![Estimator](docs/images/05-call-estimator.png) | ![Summary](docs/images/07-cost-summary.png) |
 
 ---
 
@@ -138,12 +151,16 @@ Use the **configuration panel** at the top to select:
 - **Customer / Project** — appears in exported quotes
 - **Quote Reference** — auto-generated, included in exports
 
+![Config Panel](docs/images/02-config-panel.png)
+
 ### Step 2: Select a Tier & Model
 
 Click on one of the four tier cards (**Pro**, **Standard**, **Lite**, **BYO**):
 - Each card has a **model dropdown** with the models available for that tier
 - The **LLM Processing Mode** dropdown lets you choose Native Audio, Text, or Both
 - **Audio token rates** (input/output tok/sec) are automatically set based on the selected model
+
+![Tier Selection](docs/images/04-tier-standard-selected.png)
 
 ### Step 3: Configure Call Volume
 
@@ -153,6 +170,8 @@ In the **Voice Live API Usage** section:
   - **Average call duration** (minutes)
   - **Average turns per call** (back-and-forth exchanges)
 - Set **system prompt size** and **caching level** (None / Light 20% / Heavy 50%)
+
+![Call Estimator](docs/images/05-call-estimator.png)
 
 ### Step 4: Toggle Additional Services
 
@@ -172,6 +191,10 @@ The **Summary sidebar** (right panel) shows:
 - **Export to Excel** — detailed spreadsheet with formatted tables
 - **Save Report** — persists to Azure Blob Storage (requires sign-in)
 - **Fetch Prices** — pull live pricing from Azure Retail Prices API
+
+| Cost Summary | Token Breakdown |
+|---|---|
+| ![Summary](docs/images/07-cost-summary.png) | ![Tokens](docs/images/06-token-breakdown.png) |
 
 ### Refreshing Prices
 
@@ -288,10 +311,13 @@ voice-live-pricing/
 ├── app.js                  # All calculator logic, pricing, exports, auth
 ├── styles.css              # Complete application styling
 ├── server.py               # Flask server (proxy, auth, reports API)
+├── screenshots.py          # Playwright script to capture screenshots
 ├── requirements.txt        # Python dependencies
 ├── Dockerfile              # Container image definition
 ├── .dockerignore           # Docker build exclusions
 ├── azure.yaml              # Azure Developer CLI service definition
+├── docs/
+│   └── images/             # Screenshots for documentation
 └── infra/
     ├── main.bicep           # Main infrastructure template
     ├── main.parameters.json # Deployment parameters
