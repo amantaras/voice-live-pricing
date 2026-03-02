@@ -166,22 +166,7 @@ Below the estimator, a **token breakdown table** shows the exact monthly token c
 </p>
 <p align="center"><em>Token breakdown — every billing meter itemized with tokens per call, monthly totals, unit price, and monthly cost.</em></p>
 
-### Step 4 — Toggle Additional Services
-
-Below the Voice Live section, toggle switches enable additional Azure Speech services. Each has its own set of inputs and meters:
-
-- **Speech to Text** — Real-time or batch transcription (Standard or Custom)
-- **Text to Speech** — Neural, HD Neural, or Custom voice synthesis
-- **Speech Translation** — Real-time translation
-- **Live Interpreter** — Full interpretation pipeline
-- **Video Translation** — Video dubbing and translation
-
-<p align="center">
-  <img src="docs/images/08-full-page-with-services.png" alt="Full page view with STT, TTS, and Translation services enabled alongside Voice Live" width="900">
-</p>
-<p align="center"><em>Additional services enabled — STT, TTS, and Translation sections appear below the Voice Live estimator, each with their own usage inputs.</em></p>
-
-### Step 5 — Review & Export
+### Step 4 — Review & Export
 
 The **Cost Summary** sidebar on the right updates in real time as you adjust any parameter. It shows:
 
