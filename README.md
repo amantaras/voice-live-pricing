@@ -12,46 +12,35 @@ A professional-grade interactive pricing calculator for the [Azure Voice Live AP
 [![Deploy](https://img.shields.io/badge/azd-Deploy%20to%20Azure-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](#-deploying-to-azure)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
+</div>
+
 <br>
 
-<img src="docs/images/01-dashboard-overview.png" alt="Azure Voice Live Pricing Calculator — Dashboard" width="900">
-
-</div>
+<p align="center">
+  <img src="docs/images/01-dashboard-overview.png" alt="Azure Voice Live Pricing Calculator — Full dashboard view showing tier selection, call estimator, token breakdown, and cost summary" width="900">
+</p>
+<p align="center"><em>The full dashboard: configure region and currency, select a tier and model, set call volume, and review costs — all in one view.</em></p>
 
 ---
 
 ## 📋 Table of Contents
 
-<details>
-<summary>Click to expand</summary>
-
 - [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Screenshots](#-screenshots)
 - [How It Works](#-how-it-works)
-  - [Architecture](#architecture)
-  - [Voice Live Tiers](#voice-live-tiers)
-  - [LLM Processing Modes](#llm-processing-modes)
-- [Getting Started](#-getting-started)
-  - [Using the Calculator](#using-the-calculator)
-  - [Running Locally](#running-locally)
+- [Using the Calculator](#-using-the-calculator)
+- [Running Locally](#-running-locally)
 - [Deploying to Azure](#-deploying-to-azure)
 - [Project Structure](#-project-structure)
 - [Configuration Reference](#-configuration-reference)
 - [References & Resources](#-references--resources)
-- [License](#-license)
-
-</details>
 
 ---
 
 ## 🔍 Overview
 
-The **Azure Voice Live API** is a fully managed service enabling low-latency, high-quality speech-to-speech interactions for voice agents. It integrates speech recognition, generative AI, and text-to-speech into a single unified interface.
+The **Azure Voice Live API** is a fully managed service enabling low-latency, high-quality speech-to-speech interactions for voice agents. It unifies speech recognition, generative AI, and text-to-speech into a single interface — but its pricing model is complex: multiple tiers, multiple models, multiple billing meters, caching discounts, and LLM processing modes that all interact.
 
-This calculator solves a real problem: **Voice Live pricing is complex** — multiple tiers, multiple models, multiple billing meters, caching discounts, and LLM processing modes that all interact. This tool lets you model any scenario in seconds.
-
-### What you can do
+This calculator lets you model any scenario in seconds:
 
 | | |
 |---|---|
@@ -64,109 +53,6 @@ This calculator solves a real problem: **Voice Live pricing is complex** — mul
 
 ---
 
-## ✨ Key Features
-
-<table>
-<tr>
-<td width="50%">
-
-### Pricing Engine
-- **Live pricing** from the [Azure Retail Prices API](https://learn.microsoft.com/rest/api/cost-management/retail-prices/azure-retail-prices)
-- **4 tiers** — Pro, Standard, Lite, BYO with per-tier model selection
-- **3 LLM modes** — Native Audio, Text (STT→LLM→TTS), Both
-- **Auto token rates** — ~10 tok/sec (OpenAI), ~12.5 tok/sec (Phi)
-- **System prompt caching** — None, Light (20%), Heavy (50%)
-
-</td>
-<td width="50%">
-
-### Exports & Reporting
-- **PDF export** — Professional Bill of Quantities via jsPDF
-- **Excel export** — Formatted workbooks via ExcelJS
-- **Cloud save** — Azure Blob Storage with Entra ID auth
-- **17 currencies** with live conversion rates
-- **Quote references** — Auto-generated tracking IDs
-
-</td>
-</tr>
-<tr>
-<td>
-
-### Additional Services
-- Speech to Text (Standard & Custom)
-- Text to Speech (Neural, HD, Custom)
-- Speech Translation
-- Live Interpreter
-- Video Translation
-
-</td>
-<td>
-
-### Developer Experience
-- **One-command deploy** — `azd up` to Azure Container Apps
-- **Infrastructure as Code** — Full Bicep templates
-- **Screenshots script** — Playwright-based `screenshots.py`
-- **Managed Identity** — Zero-secret Azure auth
-- **Responsive UI** — Works on any screen size
-
-</td>
-</tr>
-</table>
-
----
-
-## 📸 Screenshots
-
-<details open>
-<summary><strong>Dashboard Overview</strong> — Full application view with all configuration options</summary>
-<br>
-<img src="docs/images/01-dashboard-overview.png" alt="Dashboard Overview" width="900">
-</details>
-
-<details>
-<summary><strong>Configuration Panel</strong> — Region, currency, customer info, and quote reference</summary>
-<br>
-<img src="docs/images/02-config-panel.png" alt="Configuration Panel" width="900">
-</details>
-
-<details>
-<summary><strong>Tier Selection</strong> — Four Voice Live tiers with model and LLM mode dropdowns</summary>
-<br>
-<img src="docs/images/03-tier-selection.png" alt="Tier Selection" width="900">
-</details>
-
-<details>
-<summary><strong>Standard Tier Selected</strong> — Tier card highlighting with model-specific options</summary>
-<br>
-<img src="docs/images/04-tier-standard-selected.png" alt="Standard Tier Selected" width="900">
-</details>
-
-<details>
-<summary><strong>Call Estimator</strong> — Configure call volume, duration, turns, speech model, caching, and token rates</summary>
-<br>
-<img src="docs/images/05-call-estimator.png" alt="Call Estimator" width="900">
-</details>
-
-<details>
-<summary><strong>Token Breakdown</strong> — Detailed per-category token and cost table</summary>
-<br>
-<img src="docs/images/06-token-breakdown.png" alt="Token Breakdown" width="900">
-</details>
-
-<details>
-<summary><strong>Cost Summary</strong> — Live cost breakdown with export and save actions</summary>
-<br>
-<img src="docs/images/07-cost-summary.png" alt="Cost Summary" width="400">
-</details>
-
-<details>
-<summary><strong>Full Page with Additional Services</strong> — STT, TTS, Translation services enabled</summary>
-<br>
-<img src="docs/images/08-full-page-with-services.png" alt="Full Page with Services" width="900">
-</details>
-
----
-
 ## ⚙️ How It Works
 
 ### Architecture
@@ -174,10 +60,8 @@ This calculator solves a real problem: **Voice Live pricing is complex** — mul
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                       Browser (Client)                       │
-│                                                              │
 │  ┌────────────┐  ┌────────────┐  ┌──────────┐  ┌──────────┐ │
 │  │ index.html │  │   app.js   │  │styles.css│  │ MSAL.js  │ │
-│  │            │  │            │  │          │  │ (Auth)   │ │
 │  └────────────┘  └────────────┘  └──────────┘  └──────────┘ │
 └──────────────────────────┬───────────────────────────────────┘
                            │ HTTP
@@ -186,113 +70,138 @@ This calculator solves a real problem: **Voice Live pricing is complex** — mul
 │                                                              │
 │  GET  /                  → Static files (HTML/JS/CSS)        │
 │  GET  /api/retail/prices → Proxy → Azure Retail Prices API   │
-│  GET  /api/auth/config   → Returns Entra ID configuration    │
+│  GET  /api/auth/config   → Entra ID configuration            │
 │  GET  /api/reports       → List saved reports (JWT auth)     │
 │  POST /api/reports       → Save report (JWT auth)            │
 │  DEL  /api/reports/:id   → Delete report (JWT auth)          │
 └───────┬──────────────────────────────────────┬───────────────┘
-        │                                      │
         ▼                                      ▼
 ┌───────────────┐                   ┌────────────────────┐
 │  Azure Retail │                   │  Azure Blob        │
 │  Prices API   │                   │  Storage (reports)  │
-│  (public)     │                   │  (authenticated)    │
 └───────────────┘                   └────────────────────┘
 ```
 
-> **Why a server-side proxy?** The Azure Retail Prices API (`prices.azure.com`) does not return CORS headers, so direct browser `fetch()` calls are blocked. The Flask server proxies these requests server-side, avoiding CORS restrictions entirely.
+> **Why a server-side proxy?** The Azure Retail Prices API does not return CORS headers, so browser `fetch()` calls are blocked. The Flask server proxies these requests server-side.
 
 ### Voice Live Tiers
 
-Voice Live pricing is tier-based, determined by the generative AI model you choose:
+Voice Live pricing is tier-based, driven by the generative AI model you select:
 
-| Tier | Badge | Models | Best For | Cost |
-|:-----|:-----:|--------|----------|:----:|
-| **Pro** | 🟣 | GPT-Realtime, GPT-4o, GPT-4.1 | Complex, high-quality conversational scenarios | $$$ |
-| **Standard** | 🔵 | GPT-4o Mini Realtime, GPT-4o Mini, GPT-4.1 Mini | Balanced cost/quality for general use | $$ |
-| **Lite** | 🟢 | GPT-4.1 Nano, Phi Models | High-volume simple tasks, FAQ bots | $ |
-| **BYO** | ⚪ | Your custom model | Full control — only audio I/O charged | Varies |
+| Tier | Models | Best For | Cost |
+|:-----|:-------|:---------|:----:|
+| 🟣 **Pro** | GPT-Realtime, GPT-4o, GPT-4.1 | Complex, high-quality conversations | $$$ |
+| 🔵 **Standard** | GPT-4o Mini Realtime, GPT-4o Mini, GPT-4.1 Mini | Balanced cost and quality | $$ |
+| 🟢 **Lite** | GPT-4.1 Nano, Phi Models | High-volume simple tasks, FAQ bots | $ |
+| ⚪ **BYO** | Your custom model | Full control — only audio I/O charged | Varies |
 
-<details>
-<summary><strong>Billing Meters per Tier</strong></summary>
-
-| Meter | Pro | Standard | Lite | BYO |
-|:------|:---:|:--------:|:----:|:---:|
-| LLM Text (input / cached / output) | ✅ | ✅ | ✅ | — |
-| Audio – Standard (input / cached / output) | ✅ | ✅ | ✅ | ✅ |
-| Audio – Custom (input / cached / output) | ✅ | ✅ | ✅ | ✅ |
-| LLM Native Audio (speech-to-speech) | ✅ | ✅ | ✅ | — |
-
-</details>
+Each tier charges across multiple billing meters (text tokens, standard audio, custom audio, and native LLM audio). The BYO tier only charges for audio input/output — you bring your own LLM.
 
 ### LLM Processing Modes
 
-The **LLM Processing Mode** controls how audio flows through the generative AI model:
+Each tier supports one or more processing modes that determine how audio flows through the AI model:
 
-| Mode | Pipeline | Use Case |
-|:-----|:---------|:---------|
-| **Native Audio** | `Audio → LLM → Audio` | Lowest latency — models like GPT-Realtime handle audio natively |
-| **Text** | `Audio → STT → LLM → TTS → Audio` | Classic pipeline for text-only LLMs (GPT-4o, GPT-4.1, Phi) |
+| Mode | Pipeline | When to Use |
+|:-----|:---------|:------------|
+| **Native Audio** | `Audio → LLM → Audio` | Lowest latency — GPT-Realtime handles audio natively |
+| **Text** | `Audio → STT → LLM → TTS → Audio` | Classic pipeline for text-only LLMs (GPT-4o, Phi) |
 | **Both** | Native Audio + Text simultaneously | Maximum quality with redundancy; both token types charged |
 
-> 💡 **Token rates are auto-set per model family:**
-> OpenAI models — ~10 input tok/sec, ~20 output tok/sec.
-> Phi models — ~12.5 input tok/sec, ~20 output tok/sec.
-> Source: [Microsoft documentation](https://learn.microsoft.com/azure/ai-services/speech-service/voice-live#token-usage-and-cost-estimation)
+> 💡 Token rates are auto-set per model family: OpenAI models generate ~10 audio input tokens/sec and ~20 output tokens/sec; Phi models generate ~12.5 input and ~20 output. Source: [Microsoft docs](https://learn.microsoft.com/azure/ai-services/speech-service/voice-live#token-usage-and-cost-estimation).
 
 ---
 
-## 🚀 Getting Started
+## 🧭 Using the Calculator
 
-### Using the Calculator
+### Step 1 — Configure Region & Currency
 
-<table>
-<tr>
-<td width="60%">
+The **configuration panel** at the top of the page lets you set the context for your pricing estimate: Azure region (pricing varies by datacenter), display currency, customer or project name (appears on exported quotes), and an auto-generated quote reference for tracking.
 
-**Step 1 — Configure Region & Currency**
+<p align="center">
+  <img src="docs/images/02-config-panel.png" alt="Configuration panel showing Azure region, currency, customer name, and quote reference fields" width="900">
+</p>
+<p align="center"><em>Configuration panel — set your Azure region, currency, customer name, and quote reference before estimating costs.</em></p>
 
-Select your Azure region, display currency, customer name, and quote reference from the configuration panel.
+### Step 2 — Select a Tier & Model
 
-**Step 2 — Select a Tier & Model**
+Click one of the four **tier cards** to choose your Voice Live pricing tier. Each card contains:
 
-Click a tier card (Pro / Standard / Lite / BYO). Each has a model dropdown and an LLM Processing Mode selector. Token rates update automatically.
+- A **model dropdown** with the LLMs available for that tier
+- An **LLM Processing Mode** selector (Native Audio, Text, or Both) — options filter automatically based on model compatibility
+- A **price preview** showing the per-1K-token rate for the selected model
 
-**Step 3 — Set Call Volume**
+When you select a tier, the audio token rates (input/output tok/sec) and text tokens per turn update automatically based on the model family.
 
-Enter total hours/month or configure manually: calls/month, average duration, turns per call, speech model type, and caching level.
+<p align="center">
+  <img src="docs/images/03-tier-selection.png" alt="Four Voice Live tier cards: Pro, Standard, Lite, and BYO, each with model and LLM mode dropdowns" width="900">
+</p>
+<p align="center"><em>Tier cards — Pro is selected by default. Each card shows the available models and LLM processing mode for that tier.</em></p>
 
-**Step 4 — Toggle Additional Services**
+<p align="center">
+  <img src="docs/images/04-tier-standard-selected.png" alt="Standard tier selected, showing GPT-4o Mini Realtime model and Native Audio LLM mode" width="900">
+</p>
+<p align="center"><em>Selecting the Standard tier highlights it and updates the model dropdown and LLM mode options accordingly.</em></p>
 
-Enable any combination of standalone STT, TTS, Speech Translation, Live Interpreter, or Video Translation.
+### Step 3 — Configure Call Volume & Token Estimation
 
-**Step 5 — Review & Export**
+The **Call Estimator** is the core input section. You can either:
 
-The cost summary updates in real time. Export as PDF, Excel, or save to the cloud.
+- Enter **total hours per month** — the calculator automatically derives calls and duration, or
+- Manually set **calls per month**, **average call duration** (minutes), and **turns per call**
 
-</td>
-<td width="40%">
+Additional controls include:
+- **Speech model type** — Standard (Azure prebuilt voices) or Custom (your trained models, billed at custom rates)
+- **System prompt caching** — None, Light (~20% cached), or Heavy (~50% cached) to model caching discounts
+- **Audio token rates** — Displayed as read-only fields, auto-set from the selected model family
 
-<img src="docs/images/07-cost-summary.png" alt="Cost Summary Sidebar" width="350">
+<p align="center">
+  <img src="docs/images/05-call-estimator.png" alt="Call estimator with hours, calls, duration, turns, speech model, caching, and auto-set token rate fields" width="900">
+</p>
+<p align="center"><em>Call estimator — enter your usage parameters and the calculator computes token consumption automatically. Token rates (bottom row) are locked to model-specific values.</em></p>
 
-</td>
-</tr>
-</table>
+Below the estimator, a **token breakdown table** shows the exact monthly token counts and costs per billing category: audio input, audio output, LLM text input/output, LLM audio input/output, and cached tokens. This is the detailed view that backs the summary numbers.
 
-<table>
-<tr>
-<td width="50%">
-<img src="docs/images/04-tier-standard-selected.png" alt="Tier Selection" width="450">
-<br><em>Tier cards with per-tier model & LLM mode selection</em>
-</td>
-<td width="50%">
-<img src="docs/images/06-token-breakdown.png" alt="Token Breakdown" width="450">
-<br><em>Detailed token breakdown by category</em>
-</td>
-</tr>
-</table>
+<p align="center">
+  <img src="docs/images/06-token-breakdown.png" alt="Token breakdown table showing per-category token counts, prices per 1K tokens, and monthly costs" width="900">
+</p>
+<p align="center"><em>Token breakdown — every billing meter itemized with tokens per call, monthly totals, unit price, and monthly cost.</em></p>
 
-### Running Locally
+### Step 4 — Toggle Additional Services
+
+Below the Voice Live section, toggle switches enable additional Azure Speech services. Each has its own set of inputs and meters:
+
+- **Speech to Text** — Real-time or batch transcription (Standard or Custom)
+- **Text to Speech** — Neural, HD Neural, or Custom voice synthesis
+- **Speech Translation** — Real-time translation
+- **Live Interpreter** — Full interpretation pipeline
+- **Video Translation** — Video dubbing and translation
+
+<p align="center">
+  <img src="docs/images/08-full-page-with-services.png" alt="Full page view with STT, TTS, and Translation services enabled alongside Voice Live" width="900">
+</p>
+<p align="center"><em>Additional services enabled — STT, TTS, and Translation sections appear below the Voice Live estimator, each with their own usage inputs.</em></p>
+
+### Step 5 — Review & Export
+
+The **Cost Summary** sidebar on the right updates in real time as you adjust any parameter. It shows:
+
+- Per-service line-item costs
+- Monthly or yearly totals (toggle via dropdown)
+- Three export actions:
+  - **Export PDF** — Professional Bill of Quantities document
+  - **Export Excel** — Detailed spreadsheet with formatted tables
+  - **Save Report** — Persist to Azure Blob Storage (requires sign-in)
+
+Click **Refresh Prices** in the header at any time to pull the latest rates from the Azure Retail Prices API. A status indicator shows whether you're using live or fallback prices.
+
+<p align="center">
+  <img src="docs/images/07-cost-summary.png" alt="Cost summary sidebar showing line-item breakdown, total, and export buttons" width="400">
+</p>
+<p align="center"><em>Cost summary — real-time cost breakdown with PDF, Excel, and cloud save options.</em></p>
+
+---
+
+## 🏃 Running Locally
 
 **Prerequisites:** Python 3.10+ and pip.
 
@@ -308,15 +217,15 @@ pip install -r requirements.txt
 python server.py
 ```
 
-Open **http://localhost:8080** in your browser.
+Open **http://localhost:8080** in your browser. The calculator works immediately for pricing estimation, PDF export, and Excel export.
 
-> 📝 Authentication and cloud report saving require Azure configuration (Entra ID + Blob Storage). Without these, the calculator works fully for pricing estimation, PDF export, and Excel export.
+> 📝 Authentication and cloud report saving require Azure configuration (Entra ID app registration + Blob Storage). See [Deploying to Azure](#-deploying-to-azure) for setup.
 
 ---
 
 ## ☁️ Deploying to Azure
 
-This project deploys to **Azure Container Apps** with a single command using the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/).
+Deploy to **Azure Container Apps** with a single command using the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/).
 
 ### What gets provisioned
 
@@ -331,33 +240,26 @@ This project deploys to **Azure Container Apps** with a single command using the
 ### Step 1: Register an Entra ID Application
 
 ```bash
-# Create the app registration
 az ad app create \
   --display-name "Voice Live Pricing Calculator" \
   --sign-in-audience AzureADMyOrg \
   --web-redirect-uris "http://localhost:8080"
 
-# Note the appId, then configure the API
-az ad app update --id <appId> \
-  --identifier-uris "api://<appId>"
+# Note the appId, then set the identifier URI
+az ad app update --id <appId> --identifier-uris "api://<appId>"
 ```
 
 ### Step 2: Deploy
 
 ```bash
-# Initialize the azd environment
 azd init
-
-# Set your Entra ID client ID
 azd env set AZURE_CLIENT_ID <your-app-id>
-
-# Deploy infrastructure + application
 azd up
 ```
 
 ### Step 3: Update Redirect URI
 
-After deployment, update redirect to your Container App's FQDN:
+After deployment, update the redirect to your Container App's URL:
 
 ```bash
 az ad app update --id <appId> \
@@ -366,8 +268,6 @@ az ad app update --id <appId> \
 
 <details>
 <summary><strong>Infrastructure Details (Bicep)</strong></summary>
-
-All infrastructure is defined in Bicep under `infra/`:
 
 | File | Purpose |
 |:-----|:--------|
