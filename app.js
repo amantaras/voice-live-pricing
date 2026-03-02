@@ -828,7 +828,19 @@
         }
     }
 
+    // Detect static hosting (GitHub Pages) — no backend proxy available
+    const isStaticMode = location.hostname.endsWith('.github.io') || location.hostname.endsWith('.pages.dev');
+
     async function fetchAllPages(region, currency) {
+        // In static mode, load pre-fetched prices.json (built by GitHub Actions)
+        if (isStaticMode) {
+            const resp = await fetch('prices.json');
+            if (!resp.ok) throw new Error('prices.json not found');
+            const data = await resp.json();
+            return data.Items || [];
+        }
+
+        // Backend proxy mode
         const baseUrl = '/api/retail/prices';
         const filter = `serviceName eq 'Foundry Tools' and armRegionName eq '${region}' and contains(productName, 'Speech')`;
         let url = `${baseUrl}?currencyCode='${currency}'&$filter=${encodeURIComponent(filter)}`;
@@ -1466,7 +1478,19 @@
     // ───── Boot ─────
     document.addEventListener('DOMContentLoaded', async () => {
         init();
-        await initAuth();
+        if (isStaticMode) {
+            // Auto-fetch prices from pre-built prices.json
+            fetchPrices();
+            // Hide auth/save UI — not available in static mode
+            const loginBtn = $('#loginBtn');
+            const saveBtn = $('#saveReport');
+            const loadBtn = $('#loadReports');
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (saveBtn) saveBtn.style.display = 'none';
+            if (loadBtn) loadBtn.style.display = 'none';
+        } else {
+            await initAuth();
+        }
         const closeBtn = $('#closeReportsModal');
         if (closeBtn) closeBtn.addEventListener('click', () => $('#savedReportsModal').style.display = 'none');
     });
